@@ -5,7 +5,7 @@ module.exports = {
     getWeb3Instance : function(){
         if (web3 === null) {
             web3 = new Web3();
-            web3.setProvider(new Web3.providers.HttpProvider('http://127.0.0.1:7545'));
+            web3.setProvider(new Web3.providers.HttpProvider('http://127.0.0.1:8545'));
         } 
         return web3;
     }

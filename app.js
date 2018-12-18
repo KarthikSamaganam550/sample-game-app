@@ -5,6 +5,7 @@ var path = require('path');
 var fs = require('fs');
 var IPFS = require('./ipfs')
 var ipfs = IPFS.getIPFSObj();
+var _ = require('lodash');
 var deployScript = require('./ethereum/deploy');
 const Web3 = require('./ethereum/createWeb3');
 const web3 = Web3.getWeb3Instance();
@@ -34,11 +35,41 @@ var updateData = async(name, ipfsHash) => {
     
 }
 
+function processFile(inputFile) {
+  var fs = require('fs'),
+      readline = require('readline'),
+      instream = fs.createReadStream(inputFile),
+      outstream = new (require('stream'))(),
+      rl = readline.createInterface(instream, outstream);
+   
+  rl.on('line', function (line) {
+      console.log(line);
+      var lineRes = _.split(line,':',2);
+      console.log(lineRes)
+      if(lineRes.length == 2){
+        var path = './data/'+lineRes[0]+'.log';
+    
+        if (fs.existsSync(path)) {
+            fs.readFileSync(path).write(lineRes[1]);
+        } else {
+            fs.createWriteStream(path).write(lineRes[1]);
+        }
+        
+      }
+      
+  });
+  
+  rl.on('close', function (line) {
+      console.log(line);
+      console.log('done reading file.');
+  });
+}
 
-var cronJob = cron.job("*/5 * * * * *", function(){
+var cronJob = cron.job("*/1000 * * * * *", function(){
+
+    processFile('/Users/ksamaganam/temp/mmserver/metadata.log');
+
     var dir = '/Users/ksamaganam/sampleGameApp/data/';
-
-
     fs.readdir(dir, (error, fileNames) => {
       console.log("fileNames>>>",fileNames)
         if (error) throw error;
@@ -65,8 +96,8 @@ var cronJob = cron.job("*/5 * * * * *", function(){
 }); 
 
 
-app.listen(3000, function(res){
-    console.log("Application is running on 3000 port");
+app.listen(3001, function(res){
+    console.log("Application is running on 3001 port");
     compileAnddeployContract();
     cronJob.start();
 });
